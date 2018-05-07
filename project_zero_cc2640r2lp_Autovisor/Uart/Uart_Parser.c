@@ -4,12 +4,8 @@
  *  Created on: 29 џэт. 2018 у.
  *      Author: CIT_007
  */
-#include <string.h>
 #include "Uart_Parser.h"
-#include "Uart_commands.h"
-#include "project_zero_Autovisor.h"
 
-#define SYNC_FRAME   0xAA
 
 //enum State{ stHEADER = 0,
 //            stAddr,
@@ -23,7 +19,7 @@ Serial_Data_Packet Rx_Data;
 
 Serial_Data_Packet Tx_Data = {
                      .header = SYNC_FRAME,
-                     .addr = 0x13,
+                     .addr = 0xFF,
                      .data_lenght = 0x00,
                      .command = 0x00,
                      .data[0] = 0x00,
