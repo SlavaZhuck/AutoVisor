@@ -700,7 +700,7 @@ void user_Vogatt_CfgChangeHandler(char_data_t *pCharData)
       if (configValue) // 0x0001 and 0x0002 both indicate turned on.
       {
           if(communication_On != 1){
-              GAPRole_SendUpdateParam(8, 8, 0, TIMEOUT, GAPROLE_RESEND_PARAM_UPDATE);
+              GAPRole_SendUpdateParam(MIN_CONNECT_INTERVAL, MAX_CONNECT_INTERVAL, 0, TIMEOUT, GAPROLE_RESEND_PARAM_UPDATE);
               communication_On = 1;
           }
       }

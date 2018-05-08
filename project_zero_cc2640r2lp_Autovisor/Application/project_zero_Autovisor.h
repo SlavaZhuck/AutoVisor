@@ -183,18 +183,19 @@ typedef struct
 /****************************** User's defines **********************************/
 
 
-#define SAMP_TIME                           479999UL
-
-#define BAT_LOW_VOLTAGE                     3000
-
-#define TIMEOUT                             2000
 #define BUFSIZE                             220
 
-#define MAX_NUM_RX_BYTES    100   // Maximum RX bytes to receive in one go
-#define MAX_NUM_TX_BYTES    100   // Maximum TX bytes to send in one go
+#define MAX_NUM_RX_BYTES    220   // Maximum RX bytes to receive in one go
+#define MAX_NUM_TX_BYTES    220   // Maximum TX bytes to send in one go
 #define WANTED_RX_BYTES    1   // Maximum TX bytes to send in one go
 
 #define UART_BAUD_RATE 115200
+
+//BLE connection parameters
+#define TIMEOUT                             2000
+#define MIN_CONNECT_INTERVAL          8
+#define MAX_CONNECT_INTERVAL          100
+
 /*********************************************************************
  * MACROS
  */

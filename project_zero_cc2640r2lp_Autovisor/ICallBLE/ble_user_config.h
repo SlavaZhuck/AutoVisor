@@ -213,7 +213,7 @@ extern "C"
 // The maximum ATT_MTU is MAX_PDU_SIZE - 4.
 #ifndef MAX_PDU_SIZE
 #if defined(BLE_V42_FEATURES) && (BLE_V42_FEATURES & SECURE_CONNS_CFG)
-  #define MAX_PDU_SIZE                  69
+  #define MAX_PDU_SIZE                  224
 #else
   #define MAX_PDU_SIZE                  27
 #endif //(BLE_V42_FEATURES & SECURE_CONNS_CFG)
