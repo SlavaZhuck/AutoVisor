@@ -216,8 +216,8 @@ extern const PIN_Config BoardGpioInitTable[];
 
 /* UART Board */
 #ifndef HANDS_FREE_NOT_BOARD_NEW_VERSION
-    #define CC2640R2_LAUNCHXL_UART_RX               IOID_8//IOID_2          /* RXD */
-    #define CC2640R2_LAUNCHXL_UART_TX               IOID_9          /* TXD */
+    #define CC2640R2_LAUNCHXL_UART_RX               IOID_3//IOID_2          /* RXD */
+    #define CC2640R2_LAUNCHXL_UART_TX               IOID_2          /* TXD */
 #else
     #define CC2640R2_LAUNCHXL_UART_RX               IOID_3//IOID_2          /* RXD */
     #define CC2640R2_LAUNCHXL_UART_TX               IOID_2          /* TXD */

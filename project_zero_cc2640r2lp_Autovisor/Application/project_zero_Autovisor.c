@@ -138,6 +138,7 @@ static UART_Params uartParams;
 uint8_t macAddress[6];
 static uint32_t wantedRxBytes = WANTED_RX_BYTES;            // Number of bytes received so far
 static uint8_t rxBuf[MAX_NUM_RX_BYTES];   // Receive buffer
+static uint8_t txBuf[MAX_NUM_RX_BYTES];   // Receive buffer
 
 extern Serial_Data_Packet Tx_Data;
 extern Serial_Data_Packet Rx_Data;
@@ -199,7 +200,7 @@ void ProjectZero_createTask(void)
   Task_construct(&przTask, ProjectZero_taskFxn, &taskParams, NULL);
 }
 
-static void writeCallback(UART_Handle handle_uart, void *rxBuf, size_t size)
+static void writeCallback(UART_Handle handle_uart, void *txBuf, size_t size)
 {
 //SPPBLEServer_enqueueUARTMsg(SBC_UART_CHANGE_EVT,rxBuf,size);
 }
@@ -648,8 +649,8 @@ void user_Vogatt_ValueChangeHandler(char_data_t *pCharData)
     case V_STREAM_INPUT_ID:  //rx data here!!!
       // Do something useful with pCharData->data here
         UART_write(uart, pCharData->data, BUFSIZE);
-        memcpy(ble_tx_data, pCharData->data, BUFSIZE);
-        user_enqueueRawAppMsg(APP_MSG_SEND_DATA, &debug_send, 1);
+        //memcpy(ble_tx_data, pCharData->data, BUFSIZE);
+        //user_enqueueRawAppMsg(APP_MSG_SEND_DATA, &debug_send, 1);
       // -------------------------
       break;
 
