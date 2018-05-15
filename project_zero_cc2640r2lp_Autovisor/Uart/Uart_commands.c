@@ -40,16 +40,34 @@ void send_answer_for_command(uint8_t request){
 }
 
 
-uint8_t send_data(void){//here we receive data from host
-    if(Rx_Data.data_lenght>214)
-        Rx_Data.data_lenght = 214;
+uint8_t send_data_to_BLE(void){//here we receive data from host
+    if(Rx_Data.data_lenght > (220-6))
+        Rx_Data.data_lenght = (220-6);
 
-    memcpy(&ble_tx_data, &Rx_Data.data_lenght, sizeof(uint8_t)*2);
-    memcpy(&ble_tx_data[2], &Rx_Data.data, Rx_Data.data_lenght);
-    memcpy(&ble_tx_data[2 + Rx_Data.data_lenght], &Rx_Data.CRC, sizeof(unsigned short));
-//    user_enqueueRawAppMsg(APP_MSG_SEND_DATA, &uart_val, 1);
+    memcpy(&ble_tx_data, &Rx_Data.data_lenght, sizeof(uint8_t));
+    memcpy(&ble_tx_data[1], &Rx_Data.data, Rx_Data.data_lenght);
+    //memcpy(&ble_tx_data[2 + Rx_Data.data_lenght], &Rx_Data.CRC, sizeof(unsigned short));
+    user_enqueueRawAppMsg(APP_MSG_SEND_DATA, &uart_val, 1);
 
     //copying data somewhere
+    return 1;
+}
+
+uint8_t send_data_to_Uart(uint8_t *buf, uint8_t len){
+
+    Tx_Data.header = 0xAA;
+    Tx_Data.addr = 0xFF;
+    Tx_Data.command = 0x22;
+    Tx_Data.data_lenght = len;
+    for(uint8_t i = 0 ; i <len; i++)
+    {
+        Tx_Data.data[i] = buf[i];
+    }
+    calculated_CRC_TX = Crc16((unsigned char*)(&Tx_Data)+1,(unsigned short)(Tx_Data.data_lenght)+3);
+    Tx_Data.CRC = calculated_CRC_TX;
+    UART_write(uart, &Tx_Data, Tx_Data.data_lenght+4);
+    UART_write(uart, &Tx_Data.CRC, 2);
+
     return 1;
 }
 

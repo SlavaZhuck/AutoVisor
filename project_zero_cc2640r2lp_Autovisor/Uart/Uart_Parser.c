@@ -107,6 +107,7 @@ void OnRxByte( unsigned char Chr){
             {
              //uiState = stDL;
             }
+            uiState = stDL;
         break;}
 
         case stDL:{
@@ -190,7 +191,7 @@ uint16_t PackProcessing(void){
 //            }else{
 //                send_answer_for_command(REC_ERROR) ;
 //            }
-            send_data();
+            send_data_to_BLE();
         break;}
 
         case WRITE_AP  :{//get encryption key

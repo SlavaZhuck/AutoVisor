@@ -638,6 +638,7 @@ void user_Vogatt_ValueChangeHandler(char_data_t *pCharData)
   Util_convertArrayToHexString(pCharData->data, pCharData->dataLen,
                                pretty_data_holder, sizeof(pretty_data_holder));
 
+  uint8_t temp_buf[BUFSIZE]={0};
   switch (pCharData->paramID)
   {
     case V_STREAM_START_ID:
@@ -648,7 +649,8 @@ void user_Vogatt_ValueChangeHandler(char_data_t *pCharData)
 
     case V_STREAM_INPUT_ID:  //rx data here!!!
       // Do something useful with pCharData->data here
-        UART_write(uart, pCharData->data, BUFSIZE);
+        memcpy(temp_buf,  pCharData->data, BUFSIZE);
+        send_data_to_Uart(&temp_buf[1], temp_buf[0]);
         //memcpy(ble_tx_data, pCharData->data, BUFSIZE);
         //user_enqueueRawAppMsg(APP_MSG_SEND_DATA, &debug_send, 1);
       // -------------------------

@@ -11,7 +11,8 @@
 #include "Uart_parser.h"
 
 void get_status(void);
-uint8_t send_data(void);
+uint8_t send_data_to_BLE(void);
+uint8_t send_data_to_Uart(uint8_t *buf, uint8_t len);
 
 void no_command(void);
 void bad_crc(void);
