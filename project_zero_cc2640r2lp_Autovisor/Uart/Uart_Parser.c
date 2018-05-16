@@ -195,7 +195,7 @@ uint16_t PackProcessing(void){
         break;}
 
         case WRITE_AP  :{//get encryption key
-            //user_enqueueRawAppMsg(APP_MSG_Read_key, &uart_val, 1);
+            user_enqueueRawAppMsg(APP_MSG_Write_key, &uart_val, 1);
 
         break;}
 

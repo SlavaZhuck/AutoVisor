@@ -91,6 +91,10 @@ static uint8_t scanRspData[] =
 
 // GAP - Advertisement data (max size = 31 bytes, though this is
 // best kept short to conserve power while advertisting)
+
+uint8_t BLE_name[] = {'C', 'I', 'T', ' ', 'A', 'U', 'T','O',};
+uint8_t BLE_name_size = 9;
+
 static uint8_t advertData[] =
 {
   // Flags; this sets the device to use limited discoverable
@@ -102,7 +106,7 @@ static uint8_t advertData[] =
   DEFAULT_DISCOVERABLE_MODE | GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
 
   // complete name
-  8,
+  9,
   GAP_ADTYPE_LOCAL_NAME_COMPLETE,
   'C', 'I', 'T', ' ', 'A', 'U', 'T','O',
 
@@ -231,41 +235,9 @@ static void readCallback(UART_Handle handle, void *rxBuf, size_t size)
 
 static void ProjectZero_init(void)
 {
-    uint_least16_t hwiKey = Hwi_disable();
 
-    UART_init();
-    parser_init();
 
-// UartLog_init(UART_open(Board_UART0, NULL));
-    /* Create a UART with data processing off. */
-    UART_Params_init(&uartParams);
-    uartParams.writeDataMode    = UART_DATA_BINARY;
-    uartParams.readDataMode     = UART_DATA_BINARY;
-    uartParams.readMode         = UART_MODE_CALLBACK;
-    uartParams.writeMode        = UART_MODE_CALLBACK;
-    //uartParams.writeTimeout      = 0; //UART_WAIT_FOREVER
-    uartParams.readCallback     = readCallback;
-    uartParams.writeCallback    = writeCallback;
-    uartParams.readReturnMode   = UART_RETURN_FULL;
-    uartParams.readEcho         = UART_ECHO_OFF;
-    uartParams.baudRate         = UART_BAUD_RATE;
 
-    uart = UART_open(Board_UART0, &uartParams);
-    if (uart == NULL) {
-        /* UART_open() failed */
-        while (1);
-    }
-
-    uint64_t temp = *((uint64_t *)(0x500012E8)) & 0xFFFFFFFFFFFFFF;
-    for(uint8_t i = 0 ; i < 6 ; i++){
-        macAddress[i]=*(((uint8_t *)&temp)+i);
-    }
-    //macAddress = *((uint64_t *)(0x500012E8)) & 0xFFFFFFFFFFFFFF;
-
-    UART_write(uart, macAddress, sizeof(macAddress));
-    int rxBytes = UART_read(uart, rxBuf, wantedRxBytes);
-
-    Hwi_restore(hwiKey);
   // ******************************************************************
   // NO STACK API CALLS CAN OCCUR BEFORE THIS CALL TO ICall_registerApp
   // ******************************************************************
@@ -282,6 +254,45 @@ static void ProjectZero_init(void)
   // ******************************************************************
   // Hardware initialization
   // ******************************************************************
+  write_BLE_name(BLE_name, BLE_name_size);
+  read_BLE_name(BLE_name);
+
+
+  uint_least16_t hwiKey = Hwi_disable();
+
+  UART_init();
+  parser_init();
+
+// UartLog_init(UART_open(Board_UART0, NULL));
+  /* Create a UART with data processing off. */
+  UART_Params_init(&uartParams);
+  uartParams.writeDataMode    = UART_DATA_BINARY;
+  uartParams.readDataMode     = UART_DATA_BINARY;
+  uartParams.readMode         = UART_MODE_CALLBACK;
+  uartParams.writeMode        = UART_MODE_CALLBACK;
+  //uartParams.writeTimeout      = 0; //UART_WAIT_FOREVER
+  uartParams.readCallback     = readCallback;
+  uartParams.writeCallback    = writeCallback;
+  uartParams.readReturnMode   = UART_RETURN_FULL;
+  uartParams.readEcho         = UART_ECHO_OFF;
+  uartParams.baudRate         = UART_BAUD_RATE;
+
+  uart = UART_open(Board_UART0, &uartParams);
+  if (uart == NULL) {
+      /* UART_open() failed */
+      while (1);
+  }
+
+  uint64_t temp = *((uint64_t *)(0x500012E8)) & 0xFFFFFFFFFFFFFF;
+  for(uint8_t i = 0 ; i < 6 ; i++){
+      macAddress[i]=*(((uint8_t *)&temp)+i);
+  }
+  //macAddress = *((uint64_t *)(0x500012E8)) & 0xFFFFFFFFFFFFFF;
+
+  //UART_write(uart, macAddress, sizeof(macAddress));
+  int rxBytes = UART_read(uart, rxBuf, wantedRxBytes);
+
+  Hwi_restore(hwiKey);
 
   // ******************************************************************
   // BLE Stack initialization
@@ -523,6 +534,20 @@ static void user_processApplicationMessage(app_msg_t *pMsg)
 
         case APP_MSG_SEND_DATA:
             Vogatt_SetParameter(V_STREAM_OUTPUT_ID, sizeof(ble_tx_data), ble_tx_data);
+        break;
+        case APP_MSG_Read_key:
+            read_BLE_name(BLE_name);
+        break;
+
+
+
+        case APP_MSG_Write_key:
+            BLE_name_size = Rx_Data.data_lenght;
+            for(uint_t i = 0; i < BLE_name_size ; i++){
+                BLE_name[i] = Rx_Data.data[i];
+            }
+            write_BLE_name(BLE_name, BLE_name_size);
+
         break;
     }
 }
@@ -1152,4 +1177,27 @@ static char *Util_convertArrayToHexString(uint8_t const *src, uint8_t src_len,
     *pStr++ = ':'; // Indicate not all data fit on line.
 
   return (char *)dst;
+}
+
+
+uint8_t read_BLE_name(uint8_t *name)
+{
+
+     uint8_t status = osal_snv_read(NAME_SNV_SIZE, 1, &BLE_name_size);
+    status &= osal_snv_read(NAME_SNV_ID, BLE_name_size, name);
+    if(status != SUCCESS)
+    {
+        uint8_t default_BLE_name[] = {'C', 'I', 'T', ' ', 'A', 'U', 'T','O',};
+        uint8_t default_BLE_name_size = 9;
+        memcpy(name, default_BLE_name, default_BLE_name_size);
+    }
+
+    return status;
+}
+
+uint8_t write_BLE_name(uint8_t *key, uint8_t size)
+{
+    uint8_t status = osal_snv_write(NAME_SNV_SIZE, 1, &size);
+    status &= osal_snv_write(NAME_SNV_ID, BLE_name_size, key);
+    return 1;
 }

@@ -61,7 +61,7 @@ extern "C"
 #include "icall_ble_api.h"
 #include <icall.h>
 
-#include <osal_snv.h>
+//#include <osal_snv.h>
 #include <peripheral.h>
 #include <devinfoservice.h>
 
@@ -114,6 +114,8 @@ typedef enum
   APP_MSG_SEND_PASSCODE,       /* A pass-code/PIN is requested during pairing   */
   APP_MSG_SEND_DATA,       /* Request from app to send voice samples to BLE */
   APP_MSG_GET_VOICE_SAMP,
+  APP_MSG_Read_key,
+  APP_MSG_Write_key,
 } app_msg_types_t;
 
 typedef struct
@@ -191,6 +193,9 @@ typedef struct
 
 #define UART_BAUD_RATE 115200
 
+#define NAME_SNV_ID                          BLE_NVID_CUST_START
+#define NAME_SNV_SIZE                        BLE_NVID_CUST_START+1
+
 //BLE connection parameters
 #define TIMEOUT                             2000
 #define MIN_CONNECT_INTERVAL          8
@@ -258,5 +263,9 @@ void ProjectZero_createTask(void);
 
 void user_enqueueRawAppMsg(app_msg_types_t appMsgType, uint8_t *pData,
                                   uint16_t len);
+uint8_t read_BLE_name(uint8_t *name);
+uint8_t write_BLE_name(uint8_t *key, uint8_t size);
+
+
 
 #endif /* PROJECTZERO_H */
