@@ -92,25 +92,25 @@ static uint8_t scanRspData[] =
 // GAP - Advertisement data (max size = 31 bytes, though this is
 // best kept short to conserve power while advertisting)
 
-uint8_t BLE_name[] = {'C', 'I', 'T', ' ', 'A', 'U', 'T','O',};
+uint8_t BLE_name[GAP_DEVICE_NAME_LEN] = {'C', 'I', 'T', ' ', 'A', 'U', 'T','O',};
 uint8_t BLE_name_size = 9;
 
-static uint8_t advertData[] =
-{
-  // Flags; this sets the device to use limited discoverable
-  // mode (advertises for 30 seconds at a time) or general
-  // discoverable mode (advertises indefinitely), depending
-  // on the DEFAULT_DISCOVERY_MODE define.
-  0x02,   // length of this data
-  GAP_ADTYPE_FLAGS,
-  DEFAULT_DISCOVERABLE_MODE | GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
-
-  // complete name
-  9,
-  GAP_ADTYPE_LOCAL_NAME_COMPLETE,
-  'C', 'I', 'T', ' ', 'A', 'U', 'T','O',
-
-};
+//static uint8_t advertData[] =
+//{
+//  // Flags; this sets the device to use limited discoverable
+//  // mode (advertises for 30 seconds at a time) or general
+//  // discoverable mode (advertises indefinitely), depending
+//  // on the DEFAULT_DISCOVERY_MODE define.
+//  0x02,   // length of this data
+//  GAP_ADTYPE_FLAGS,
+//  DEFAULT_DISCOVERABLE_MODE | GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
+//
+//  // complete name
+//  9,
+//  GAP_ADTYPE_LOCAL_NAME_COMPLETE,
+//  'C', 'I', 'T', ' ', 'A', 'U', 'T','O',
+//
+//};
 
 // GAP GATT Attributes
 static uint8_t attDeviceName[GAP_DEVICE_NAME_LEN] = "CIT AUTO";
@@ -254,7 +254,7 @@ static void ProjectZero_init(void)
   // ******************************************************************
   // Hardware initialization
   // ******************************************************************
-  write_BLE_name(BLE_name, BLE_name_size);
+ // write_BLE_name(BLE_name, BLE_name_size);
   read_BLE_name(BLE_name);
 
 
@@ -317,7 +317,33 @@ static void ProjectZero_init(void)
   GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData), scanRspData);
 
   // Initialize Advertisement data
-  GAPRole_SetParameter(GAPROLE_ADVERT_DATA, sizeof(advertData), advertData);
+  uint8_t advertData[5+GAP_DEVICE_NAME_LEN] = //5+21
+  {
+    // Flags; this sets the device to use limited discoverable
+    // mode (advertises for 30 seconds at a time) or general
+    // discoverable mode (advertises indefinitely), depending
+    // on the DEFAULT_DISCOVERY_MODE define.
+    0x02,   // length of this data
+    GAP_ADTYPE_FLAGS,
+    DEFAULT_DISCOVERABLE_MODE | GAP_ADTYPE_FLAGS_BREDR_NOT_SUPPORTED,
+
+    // complete name
+    9,
+    GAP_ADTYPE_LOCAL_NAME_COMPLETE,
+    'C', 'I', 'T', ' ', 'A', 'U', 'T','O',
+  };
+
+  advertData[3] = BLE_name_size;
+  for(uint8_t i = 0; i<BLE_name_size; i++){
+      advertData[5+i] = BLE_name[i];
+  }
+
+  memset(attDeviceName, 0, sizeof(attDeviceName));
+  for(uint8_t i = 0; i<BLE_name_size; i++){
+      attDeviceName[i] = BLE_name[i];
+  }
+
+  GAPRole_SetParameter(GAPROLE_ADVERT_DATA, 5+BLE_name_size, advertData); //sizeof(5+BLE_name_size-1) //13
 
   // Set advertising interval
   uint16_t advInt = DEFAULT_ADVERTISING_INTERVAL;
@@ -535,15 +561,23 @@ static void user_processApplicationMessage(app_msg_t *pMsg)
         case APP_MSG_SEND_DATA:
             Vogatt_SetParameter(V_STREAM_OUTPUT_ID, sizeof(ble_tx_data), ble_tx_data);
         break;
-        case APP_MSG_Read_key:
+        case APP_MSG_Read_name:
             read_BLE_name(BLE_name);
         break;
 
 
 
-        case APP_MSG_Write_key:
-            BLE_name_size = Rx_Data.data_lenght;
-            for(uint_t i = 0; i < BLE_name_size ; i++){
+        case APP_MSG_Write_name:
+            if(Rx_Data.data_lenght > GAP_DEVICE_NAME_LEN )
+            {
+                BLE_name_size = GAP_DEVICE_NAME_LEN;
+            }
+            else
+            {
+                BLE_name_size = Rx_Data.data_lenght;
+            }
+
+            for(uint8_t i = 0; i < BLE_name_size ; i++){
                 BLE_name[i] = Rx_Data.data[i];
             }
             write_BLE_name(BLE_name, BLE_name_size);

@@ -114,8 +114,8 @@ typedef enum
   APP_MSG_SEND_PASSCODE,       /* A pass-code/PIN is requested during pairing   */
   APP_MSG_SEND_DATA,       /* Request from app to send voice samples to BLE */
   APP_MSG_GET_VOICE_SAMP,
-  APP_MSG_Read_key,
-  APP_MSG_Write_key,
+  APP_MSG_Read_name,
+  APP_MSG_Write_name,
 } app_msg_types_t;
 
 typedef struct
